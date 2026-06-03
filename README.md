@@ -1,86 +1,124 @@
-# The Hope Index 🇲🇦
+# The Miracle Index &nbsp;·&nbsp; The Hope Index
 
-> Can we measure a nation's hope during the World Cup — and tell when its heart drifts from the math?
+> Football is a machine for making the improbable feel inevitable. This project measures the improbable — and the hope that surrounds it.
 
-A real-time pipeline that tracks the **emotional hope** of a fan base (Morocco) from
-free social sources, and contrasts it against the **statistical hope** from an Elo model.
-The story lives in the gap between the two.
+**Two connected instruments, one Elo engine.**
+
+- **The Miracle Index** — how unlikely was that result, really? A century and a half of football, scored by how far each outcome stood from what was expected.
+- **The Hope Index** — how far does a nation's *heart* drift from the *math*? A live pipeline that reads the mood of a fan base during the World Cup and contrasts it with the cold expectation of the model.
+
+🔗 **Live demo:** https://achrafi04.github.io/hope-index/
+
+---
+
+## Why this exists
+
+When supporters say *"it was written,"* they reach for fate. But every result was once only probable. The same Elo engine that tells us how improbable the past was can tell us, in real time, when a crowd believes more than the numbers justify — the moment hope outruns probability. That gap is the whole story.
+
+---
+
+## 1 · The Miracle Index
+
+An Elo model (World Football Elo style) is built chronologically over **49,363 international matches since 1872**. For any World Cup match it holds a pre-match expectation; when the underdog wins, the miracle index is `(1 − P(winner)) × 100`.
+
+### Biggest single-match upsets (all-time)
+
+| Rank | Match | Score | Win prob. | Miracle |
+|----:|-------|:-----:|:---------:|:-------:|
+| 1 | Cameroon over Brazil (2022) | 1–0 | 4.5% | **95.5** |
+| 2 | United States over England (1950) | 1–0 | 7.7% | 92.3 |
+| 3 | Saudi Arabia over Argentina (2022) | 2–1 | 7.8% | 92.2 |
+| 4 | Switzerland over Spain (2010) | 1–0 | 11.7% | 88.3 |
+| 5 | South Korea over Germany (2018) | 2–0 | 12.4% | 87.6 |
+
+### The deeper miracle — surviving a tournament
+
+A single upset is one thing; climbing a whole bracket against the odds is another. The pre-2022 Elo is **frozen at the eve of the tournament** (no hindsight) and the entire bracket is simulated **40,000 times** via Monte-Carlo. Knockout shootouts are modelled as a near coin-flip with only a mild edge to the stronger side.
+
+| Team | Reached | Pre-tournament prob. | Miracle |
+|------|---------|:--------------------:|:-------:|
+| **Morocco** | **semi-final** | **2.5%** | **97.5** |
+| Croatia | semi-final | 10.2% | 89.8 |
+| France | final | 12.8% | 87.2 |
+| Argentina | the title | 20.0% | 80.0 |
+
+**Morocco's run to the semi-final — a 2.5% pre-tournament event — is the single greatest miracle in this dataset, deeper even than any one-match upset.** Their climb: round of 16 (30.5%) → quarter-final (9.9%) → semi-final (2.5%).
+
+---
+
+## 2 · The Hope Index
+
+A live pipeline that measures a nation's emotional hope during the World Cup and plots it against statistical hope.
 
 ```
-   FAITH zone  ┃   ╭─emotional hope (social)
-        ▲      ┃  ╱
-        │      ┃ ╱      ← Belief Gap = the whole point
-   ─────┼──────╋╱──────────────────────  statistical hope (Elo)
-        │      ┃
-   DOUBT zone  ┃
-               └── time → (per match, per hour)
+   FAITH  ┃   ╭─ emotional hope (the crowd)
+          ┃  ╱
+   ───────╋─────────────────────────  statistical hope (Elo)
+          ┃ ╲
+   DOUBT  ┃  ╰─ when the model believes more than the people
 ```
 
-## Why this design
+- **Emotional hope** — real posts from **YouTube comments** and **Bluesky** (both free), scored by a **multilingual** sentiment model across English, French, Arabic and Darija, then mapped to a 0–100 mood.
+- **Statistical hope** — the Elo win expectation for the next opponent, from the same engine as the Miracle Index.
+- **The Belief Gap** — `emotional − statistical`. Positive = faith; negative = doubt. The story lives in the gap.
 
-- **No paid APIs.** X (Twitter) went pay-per-use in 2026 — out. We use **Reddit**,
-  **YouTube comments**, and **Bluesky** (open, free, real-time). All free.
-- **Multilingual on purpose.** YouTube comments + Bluesky give us Arabic / Darija /
-  French / English reactions on the *same* match. The Darija angle is the edge —
-  it's an underserved NLP space and it's authentically yours.
-- **Reuses the Miracle Index engine.** The same Elo that ranked history's biggest
-  upsets now produces the "cold head" axis. Nothing is wasted.
+It runs unattended (cron), stores a SQLite time series, and regenerates a self-contained editorial dashboard after every pass.
 
-## Architecture
+---
+
+## How it works
 
 ```
-config.py              # teams, multilingual keywords, source toggles, window size
-sources/
-  reddit_source.py     # PRAW            (free app credentials)
-  youtube_source.py    # Data API v3     (free 10k units/day)
-  bluesky_source.py    # AT Protocol     (free app password) — the live spike detector
-nlp.py                 # XLM-R multilingual sentiment -> valence [-1,1] (+ offline fallback)
-index.py               # Hope Index formula + SQLite time series
-belief_gap.py          # Elo statistical-hope axis (reused) + the gap
-run.py                 # one pass = one Hope Index point (schedule it)
-demo.py                # offline proof — runs with no keys, no internet
-results.csv            # international match history (Elo input)
+Elo engine ──┬── Miracle Index (match-level)      → index.html
+             ├── Monte-Carlo bracket (40k sims)    → qualification_miracles.py
+             └── statistical-hope axis ─┐
+                                        ├── Belief Gap → dashboard
+ YouTube + Bluesky → multilingual NLP ──┘
 ```
 
-**Hope Index (0–100):** `hope = clamp(50 * (1 + mood))`, where `mood` is the
-engagement-weighted mean sentiment. Volume is tracked separately as *attention
-intensity* (how loud the nation is, vs its rolling baseline).
+| Layer | What it does | Key files |
+|------|---------------|-----------|
+| Ratings | World-Football-style Elo over all internationals | `belief_gap.py`, `miracle_index.py` |
+| Improbability | match-level + Monte-Carlo tournament miracles | `qualification_miracles.py` |
+| Collection | free multilingual social sources | `sources/youtube_source.py`, `sources/bluesky_source.py` |
+| Sentiment | XLM-R multilingual valence (+ offline fallback) | `nlp.py` |
+| Aggregation | Hope Index + Belief Gap + SQLite | `index.py`, `run.py` |
+| Presentation | editorial pages, hand-drawn SVG, no chart libs | `index.html`, `build_dashboard.py` |
 
-**Belief Gap:** `emotional_hope − statistical_hope`. Positive = the crowd believes
-more than the model (faith); negative = more pessimistic than the model (doubt).
+---
 
-## Quick start
+## Tech stack
+
+`Python` · `pandas` · `transformers` / `torch` (XLM-R: `cardiffnlp/twitter-xlm-roberta-base-sentiment`) · `atproto` (Bluesky) · `google-api-python-client` (YouTube) · `SQLite` · vanilla `HTML` / `SVG` (Fraunces + Newsreader, no frameworks, no chart libraries).
+
+## Run it yourself
 
 ```bash
-pip install pandas transformers torch praw google-api-python-client atproto
+python -m venv .venv && source .venv/bin/activate
+pip install pandas transformers torch atproto google-api-python-client python-dotenv sentencepiece
+curl -sL -o results.csv https://raw.githubusercontent.com/martj42/international_results/master/results.csv
 
-# 1) prove the brain with zero setup:
-python demo.py
-
-# 2) free credentials (env vars):
-export REDDIT_CLIENT_ID=...      REDDIT_CLIENT_SECRET=...   REDDIT_USER_AGENT=hope-index/0.1
-export YOUTUBE_API_KEY=...
-export BSKY_HANDLE=you.bsky.social   BSKY_APP_PASSWORD=...
-
-# 3) one live pass (also computes the gap vs your next opponent):
-python run.py --opponent Haiti
+python miracle_index.py            # the all-time match upsets
+python qualification_miracles.py   # Monte-Carlo tournament miracles
+python demo.py                     # the Hope Index brain, no API keys needed
 ```
 
-Schedule `run.py` every 60 min (every 5–15 min on match days) via cron. Each pass
-appends one point to `hope.db`.
+For the live Hope Index, add free credentials to a `.env` file (`YOUTUBE_API_KEY`, `BSKY_HANDLE`, `BSKY_APP_PASSWORD`), then `python run.py --opponent Brazil`.
+
+## Method & honest limitations
+
+- **Elo is strength-only** — it has no explicit goals model; scorelines enter only through a margin-of-victory multiplier.
+- **Shootouts** are modelled as a near coin-flip with a mild Elo tilt — defensible, but a simplification.
+- **Group tiebreaks** in the Monte-Carlo use a random draw among equal points (goal difference isn't modelled).
+- **Darija** is the sentiment model's weak spot; the strongest planned improvement is fine-tuning a dedicated Darija model. Until then, Darija leans on the multilingual baseline.
+- **Social sampling** is keyword-based, not a representative survey — the Hope Index reads online discourse, not a nation in full.
 
 ## Roadmap
 
-1. **Now → June 11:** get keys, run `run.py` on pre-tournament chatter so the
-   pipeline is battle-tested before kickoff. Tune `ALPHA` and window size.
-2. **During the cup:** dense windows on Morocco match days; the emotional curve vs
-   the Elo line is your content.
-3. **The research edge:** fine-tune a Darija sentiment model (base: `DarijaBERT`)
-   to replace XLM-R on Darija text — this is what makes the project publishable, not
-   just a portfolio piece.
-4. **Dashboard:** a single HTML page reading `hope.db` — emotional curve, Elo line,
-   shaded Belief Gap, per-match annotations. (Same broadcast aesthetic as the
-   Miracle Index page.)
+- [ ] Publish the live Hope Index dashboard once it has a real match-day curve
+- [ ] Fine-tune a Darija sentiment model (research edge → publishable)
+- [ ] Extend the Monte-Carlo to the 48-team 2026 format
 
----
-*Built on the road to FIFA World Cup 2026. Companion to The Miracle Index.*
+## Data & credits
+
+International match results: [martj42/international_results](https://github.com/martj42/international_results). Built on the road to the FIFA World Cup 2026.
