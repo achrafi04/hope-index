@@ -1,0 +1,9 @@
+.env
+hope.db
+.venv/
+__pycache__/
+*.pyc
+results.csv
+cron.log
+dashboard.html
+preview.html
