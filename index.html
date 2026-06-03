@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Miracle Index — An Essay in Probability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f3efe6;
+    --paper2:#f8f5ed;
+    --ink:#211d18;
+    --ink-soft:#403a32;
+    --mut:#8a8073;
+    --line:rgba(33,29,24,.14);
+    --line-soft:rgba(33,29,24,.08);
+    --accent:#7c2e2c;        /* deep claret */
+    --accent-soft:#a9534f;
+    --disp:'Fraunces',Georgia,serif;
+    --read:'Newsreader',Georgia,serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--read);
+    font-size:19px;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+    font-feature-settings:"onum" 1,"liga" 1;
+  }
+  body::before{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;
+    background:radial-gradient(1100px 700px at 50% -5%, rgba(124,46,44,.05), transparent 60%);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.025;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:0 26px}
+
+  .eyebrow{font-family:var(--read);font-size:13px;letter-spacing:.26em;text-transform:uppercase;
+    color:var(--accent);font-weight:500;display:flex;align-items:center;gap:14px}
+  .eyebrow::before{content:"";width:30px;height:1px;background:var(--accent);display:inline-block;opacity:.6}
+
+  /* ---------- MASTHEAD ---------- */
+  .mast{padding:96px 0 0}
+  .mast h1{font-family:var(--disp);font-weight:500;font-size:clamp(52px,10vw,104px);
+    line-height:.98;letter-spacing:-.02em;margin:30px 0 0}
+  .mast h1 em{font-style:italic;color:var(--accent)}
+  .deck{font-family:var(--read);font-size:clamp(20px,2.6vw,25px);font-style:italic;
+    color:var(--ink-soft);margin-top:26px;max-width:600px;line-height:1.55}
+  .lede{margin-top:34px;color:var(--ink-soft);font-size:20px}
+  .lede::first-letter{
+    font-family:var(--disp);font-weight:500;float:left;font-size:78px;line-height:.74;
+    padding:8px 12px 0 0;color:var(--accent)}
+  .lede b{color:var(--ink);font-weight:500}
+  .rule{height:1px;background:var(--line);margin:54px 0;border:0}
+
+  .figures{display:flex;flex-wrap:wrap;gap:0;margin:46px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .fig{flex:1;min-width:150px;padding:22px 4px;text-align:center;border-right:1px solid var(--line-soft)}
+  .fig:last-child{border-right:0}
+  .fig .n{font-family:var(--disp);font-size:38px;font-weight:500;color:var(--ink)}
+  .fig .l{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-top:6px}
+
+  .formula{font-family:var(--disp);font-style:italic;font-size:clamp(20px,3.2vw,28px);
+    text-align:center;color:var(--ink-soft);margin:8px 0 4px;line-height:1.4}
+  .formula .a{color:var(--accent);font-style:normal}
+  .gloss{text-align:center;color:var(--mut);font-size:16px;font-style:italic;max-width:480px;margin:14px auto 0}
+
+  /* ---------- SECTION ---------- */
+  section{padding:60px 0 0}
+  h2{font-family:var(--disp);font-weight:500;font-size:clamp(28px,5vw,42px);
+    letter-spacing:-.015em;margin:18px 0 8px;line-height:1.05}
+  .sublede{color:var(--mut);font-style:italic;font-size:18px;margin-bottom:30px;max-width:560px}
+
+  /* ---------- HERO ENTRY ---------- */
+  .one{border-top:2px solid var(--ink);padding-top:26px}
+  .one .yr{font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+  .one .match{font-family:var(--disp);font-weight:500;font-size:clamp(30px,6vw,52px);
+    line-height:1.04;letter-spacing:-.02em;margin:12px 0 16px}
+  .one .match .sc{color:var(--accent);font-style:italic}
+  .one .match .vs{color:var(--mut);font-size:.5em;font-style:italic}
+  .one .body{display:flex;align-items:flex-end;justify-content:space-between;gap:30px;flex-wrap:wrap}
+  .one .body p{max-width:400px;color:var(--ink-soft);font-size:18px}
+  .one .body p b{color:var(--accent);font-weight:500}
+  .one .score{text-align:right;flex-shrink:0}
+  .one .score .num{font-family:var(--disp);font-size:clamp(72px,16vw,128px);font-weight:500;
+    color:var(--accent);line-height:.8;letter-spacing:-.03em}
+  .one .score .cap{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--mut);margin-top:8px}
+
+  /* ---------- LEDGER ---------- */
+  .ledger{margin-top:8px}
+  .lrow{display:grid;grid-template-columns:30px 1fr 86px;gap:18px;align-items:baseline;
+    padding:17px 0;border-bottom:1px solid var(--line-soft);
+    opacity:0;transform:translateY(10px);transition:opacity .7s ease,transform .7s ease}
+  .lrow.in{opacity:1;transform:none}
+  .lrow .rk{font-family:var(--disp);font-size:17px;color:var(--mut);text-align:right}
+  .lrow .m{min-width:0}
+  .lrow .pair{font-family:var(--disp);font-size:clamp(19px,3.4vw,23px);font-weight:500;letter-spacing:-.01em}
+  .lrow .pair .beat{font-family:var(--read);font-style:italic;color:var(--mut);font-weight:400;font-size:.74em}
+  .lrow .sub{font-size:14px;color:var(--mut);font-style:italic;margin-top:3px}
+  .lrow .sub .sc{font-style:normal;color:var(--ink-soft)}
+  .track{height:2px;background:var(--line);margin-top:11px;position:relative;overflow:hidden}
+  .track i{position:absolute;left:0;top:0;height:100%;width:0;background:var(--accent);transition:width 1.2s cubic-bezier(.2,.75,.2,1)}
+  .lrow .mi{font-family:var(--disp);font-size:clamp(26px,5vw,34px);font-weight:500;color:var(--ink);text-align:right;line-height:1}
+
+  /* ---------- MOROCCO ---------- */
+  .focus{border-left:2px solid var(--accent);padding-left:30px;margin-left:2px}
+  .focus h2{margin-top:0}
+  .focus .intro{font-style:italic;color:var(--ink-soft);font-size:19px;max-width:540px;margin-bottom:28px}
+  .mrow{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:baseline;
+    padding:15px 0;border-bottom:1px solid var(--line-soft)}
+  .mrow .o{font-family:var(--disp);font-size:clamp(18px,3.6vw,22px);font-weight:500}
+  .mrow .o .beat{font-family:var(--read);font-style:italic;color:var(--mut);font-weight:400;font-size:.78em}
+  .mrow .o .det{display:block;font-family:var(--read);font-size:14px;font-style:italic;color:var(--mut);margin-top:3px}
+  .mrow .o .det .sc{font-style:normal;color:var(--ink-soft)}
+  .mrow .v{font-family:var(--disp);font-size:clamp(24px,5vw,32px);font-weight:500;color:var(--accent)}
+  .aside{margin-top:26px;font-size:16px;font-style:italic;color:var(--mut);line-height:1.7;max-width:580px}
+  .aside b{font-style:normal;color:var(--ink-soft);font-weight:500}
+
+  /* ---------- 2026 ---------- */
+  .erow{display:grid;grid-template-columns:26px 1fr 150px 52px;gap:16px;align-items:center;
+    padding:11px 0;border-bottom:1px solid var(--line-soft);
+    opacity:0;transform:translateX(-10px);transition:opacity .55s ease,transform .55s ease}
+  .erow.in{opacity:1;transform:none}
+  .erow .rk{font-family:var(--disp);font-size:15px;color:var(--mut);text-align:right}
+  .erow .tm{font-family:var(--disp);font-size:19px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .etrack{height:3px;background:var(--line);position:relative;overflow:hidden}
+  .etrack i{position:absolute;left:0;top:0;height:100%;width:0;background:var(--ink-soft);transition:width 1s cubic-bezier(.2,.75,.2,1)}
+  .erow .el{font-family:var(--disp);font-size:16px;color:var(--mut);text-align:right}
+  .erow.mor .tm,.erow.mor .el{color:var(--accent)}
+  .erow.mor .etrack i{background:var(--accent)}
+
+  /* ---------- METHOD ---------- */
+  .method{margin:8px 0 0;color:var(--ink-soft);font-size:17px;line-height:1.85}
+  .method p{margin-bottom:14px}
+  .method b{color:var(--ink);font-weight:500}
+  footer{margin:64px 0 60px;padding-top:26px;border-top:1px solid var(--line);
+    font-size:14px;font-style:italic;color:var(--mut);letter-spacing:.02em}
+
+  @media(max-width:560px){
+    body{font-size:18px}
+    .one .score{text-align:left}
+    .erow{grid-template-columns:22px 1fr 90px 46px;gap:11px}
+    .erow .tm{font-size:16px}
+    .lrow{grid-template-columns:24px 1fr 66px;gap:12px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- MASTHEAD -->
+  <header class="mast">
+    <div class="eyebrow">An Essay in Probability &nbsp;·&nbsp; Football, 1872 — 2026</div>
+    <h1>The <em>Miracle</em> Index</h1>
+    <p class="deck">When supporters say <span style="font-style:normal">“it was written,”</span> they reach for fate. But every result was once only probable.</p>
+    <p class="lede">There is a quiet arrogance in hindsight. A team wins against the odds and we call it destiny, as though the outcome had been waiting all along. Yet before the whistle, the world was open — and most of what felt inevitable was, in truth, <b>unlikely</b>. This is an attempt to measure that unlikelihood: to take a century and a half of football, ask what each result was supposed to be, and find the moments when the impossible quietly happened anyway.</p>
+
+    <div class="figures">
+      <div class="fig"><div class="n" data-count="964">0</div><div class="l">World Cup matches</div></div>
+      <div class="fig"><div class="n" data-count="750">0</div><div class="l">Decisive results</div></div>
+      <div class="fig"><div class="n" data-count="49363">0</div><div class="l">Matches to calibrate</div></div>
+    </div>
+
+    <p class="formula">Miracle = ( 1 − <span class="a">probability of the result</span> ) × 100</p>
+    <p class="gloss">A winner the model gave a 15% chance scores 85. The less the world expected it, the higher it climbs.</p>
+  </header>
+
+  <hr class="rule">
+
+  <!-- THE ONE -->
+  <section>
+    <div class="eyebrow">No. 01</div>
+    <h2>The greatest improbability ever recorded</h2>
+    <p class="sublede">Of every decisive World Cup match since 1930, one stands furthest from what was expected.</p>
+    <div class="one">
+      <div class="yr">Qatar 2022 · Group Stage</div>
+      <div class="match">Cameroon <span class="sc">1–0</span> <span class="vs">defeat of</span> Brazil</div>
+      <div class="body">
+        <p>The model gave Cameroon a <b>4.5%</b> chance of winning. They won. No result in the history of the tournament has so thoroughly defied its own forecast.</p>
+        <div class="score"><div class="num" data-count="95.5" data-dec="1">0</div><div class="cap">Miracle Index</div></div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- LEDGER -->
+  <section>
+    <div class="eyebrow">The Ledger</div>
+    <h2>Fifteen against the odds</h2>
+    <p class="sublede">The largest single-match upsets in World Cup history, ranked by how improbable the winner's victory was.</p>
+    <div class="ledger" id="board"></div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- MOROCCO -->
+  <section>
+    <div class="eyebrow">A Closer Reading</div>
+    <div class="focus">
+      <h2>Morocco against the giants</h2>
+      <p class="intro">A nation that turned arithmetic into folklore. Its World Cup victories, ordered by the size of the upset they represented.</p>
+      <div id="morocco"></div>
+      <p class="aside">A note on what is missing. This ledger counts only victories settled in regulation play. Morocco's defeat of Spain in 2022 — goalless, then decided on penalties — is recorded in the data as a draw, and so the most celebrated escape of all does not appear here. <b>That is the next chapter:</b> not the probability of winning a match, but of surviving a tournament.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- 2026 -->
+  <section>
+    <div class="eyebrow">The Coming Tournament</div>
+    <h2>2026, at the whistle</h2>
+    <p class="sublede">The sixteen strongest qualified nations by Elo on the eve of the cup. Morocco enters thirteenth of forty-eight — every win over those above is, by definition, a small miracle in waiting.</p>
+    <div id="elo"></div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- METHOD -->
+  <section>
+    <div class="eyebrow">Method</div>
+    <h2>How the unlikely is measured</h2>
+    <div class="method">
+      <p>An Elo rating model, in the tradition of the World Football Elo Ratings, is built chronologically across every international match since 1872. Each team carries a strength; each result moves it, weighted by the importance of the fixture and the margin of victory. Home advantage is set at one hundred points, and falls to zero on neutral ground.</p>
+      <p>Before any World Cup match, the model holds an <b>expectation</b> for each side — a number between zero and one. When the underdog wins, the miracle index is simply one minus that expectation, expressed out of a hundred. A team expected to take a quarter of a point that wins outright has authored a far greater miracle than a near-equal that edges through.</p>
+      <p>One honest limitation: penalty shootouts are absent from the source data, so matches drawn in regulation are set aside. The famous escapes decided from the spot await a second, tournament-level measure.</p>
+    </div>
+  </section>
+
+  <footer>The Miracle Index · first edition · on the road to the FIFA World Cup 2026</footer>
+
+</div>
+
+<script>
+const TOP = [
+  {r:1,w:"Cameroon",l:"Brazil",sc:"1–0",yr:2022,p:4.5,mi:95.5},
+  {r:2,w:"United States",l:"England",sc:"1–0",yr:1950,p:7.7,mi:92.3},
+  {r:3,w:"Saudi Arabia",l:"Argentina",sc:"2–1",yr:2022,p:7.8,mi:92.2},
+  {r:4,w:"Switzerland",l:"Spain",sc:"1–0",yr:2010,p:11.7,mi:88.3},
+  {r:5,w:"South Korea",l:"Germany",sc:"2–0",yr:2018,p:12.4,mi:87.6},
+  {r:6,w:"Algeria",l:"West Germany",sc:"2–1",yr:1982,p:13.4,mi:86.6},
+  {r:7,w:"Ghana",l:"Czech Republic",sc:"2–0",yr:2006,p:14.2,mi:85.8},
+  {r:8,w:"Senegal",l:"France",sc:"1–0",yr:2002,p:14.7,mi:85.3},
+  {r:9,w:"Uruguay",l:"Brazil",sc:"2–1",yr:1950,p:15.2,mi:84.8},
+  {r:10,w:"Tunisia",l:"France",sc:"1–0",yr:2022,p:16.0,mi:84.0},
+  {r:11,w:"Wales",l:"Hungary",sc:"2–1",yr:1958,p:16.6,mi:83.4},
+  {r:12,w:"Slovakia",l:"Italy",sc:"3–2",yr:2010,p:17.5,mi:82.5},
+  {r:13,w:"Italy",l:"Brazil",sc:"3–2",yr:1982,p:19.0,mi:81.0},
+  {r:14,w:"South Korea",l:"Portugal",sc:"2–1",yr:2022,p:19.3,mi:80.7},
+  {r:15,w:"East Germany",l:"West Germany",sc:"1–0",yr:1974,p:19.9,mi:80.1},
+];
+const MOR = [
+  {l:"Belgium",sc:"2–0",yr:2022,p:23.2,mi:76.8},
+  {l:"Portugal",sc:"1–0",yr:2022,p:32.2,mi:67.8},
+  {l:"Portugal",sc:"3–1",yr:1986,p:49.0,mi:51.0},
+  {l:"Scotland",sc:"3–0",yr:1998,p:53.8,mi:46.2},
+  {l:"Canada",sc:"2–1",yr:2022,p:64.7,mi:35.3},
+];
+const ELO = [
+  {t:"Spain",e:2207},{t:"Argentina",e:2173},{t:"France",e:2141},{t:"England",e:2076},
+  {t:"Brazil",e:2059},{t:"Colombia",e:2047},{t:"Portugal",e:2039},{t:"Netherlands",e:2017},
+  {t:"Ecuador",e:2016},{t:"Japan",e:1994},{t:"Germany",e:1991},{t:"Croatia",e:1990},
+  {t:"Morocco",e:1981},{t:"Uruguay",e:1968},{t:"Norway",e:1966},{t:"Mexico",e:1958},
+];
+
+const board=document.getElementById('board');
+TOP.forEach(d=>{
+  const el=document.createElement('div');el.className='lrow';
+  el.innerHTML=`<div class="rk">${d.r}</div>
+    <div class="m">
+      <div class="pair">${d.w} <span class="beat">over</span> ${d.l}</div>
+      <div class="sub"><span class="sc">${d.sc}</span> · ${d.yr} · win probability ${d.p}%</div>
+      <div class="track"><i data-w="${d.mi}"></i></div>
+    </div>
+    <div class="mi">${d.mi}</div>`;
+  board.appendChild(el);
+});
+
+const m=document.getElementById('morocco');
+MOR.forEach(d=>{
+  const el=document.createElement('div');el.className='mrow';
+  el.innerHTML=`<div class="o">Morocco <span class="beat">over</span> ${d.l}
+      <span class="det"><span class="sc">${d.sc}</span> · ${d.yr} · expected ${d.p}%</span></div>
+    <div class="v">${d.mi}</div>`;
+  m.appendChild(el);
+});
+
+const e=document.getElementById('elo');const max=ELO[0].e,min=1900;
+ELO.forEach((d,i)=>{
+  const el=document.createElement('div');el.className='erow'+(d.t==='Morocco'?' mor':'');
+  const pct=Math.round((d.e-min)/(max-min)*100);
+  el.innerHTML=`<div class="rk">${i+1}</div><div class="tm">${d.t}</div>
+    <div class="etrack"><i data-w="${pct}"></i></div><div class="el">${d.e}</div>`;
+  e.appendChild(el);
+});
+
+const io=new IntersectionObserver((es)=>{
+  es.forEach(en=>{
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      const bar=en.target.querySelector('i[data-w]');
+      if(bar) requestAnimationFrame(()=>bar.style.width=bar.dataset.w+'%');
+      io.unobserve(en.target);
+    }
+  });
+},{threshold:.18});
+document.querySelectorAll('.lrow,.erow').forEach((r,i)=>{r.style.transitionDelay=(i%15*45)+'ms';io.observe(r);});
+
+function countUp(el){
+  const tgt=parseFloat(el.dataset.count),dec=+(el.dataset.dec||0),dur=1500,t0=performance.now();
+  (function tick(t){
+    let p=Math.min((t-t0)/dur,1);p=1-Math.pow(1-p,3);
+    const v=tgt*p;
+    el.textContent=dec?v.toFixed(dec):Math.round(v).toLocaleString('en-US');
+    if(p<1)requestAnimationFrame(tick);
+  })(performance.now());
+}
+const cio=new IntersectionObserver((es)=>{es.forEach(en=>{if(en.isIntersecting){countUp(en.target);cio.unobserve(en.target);}});},{threshold:.6});
+document.querySelectorAll('[data-count]').forEach(el=>cio.observe(el));
+</script>
+</body>
+</html>
