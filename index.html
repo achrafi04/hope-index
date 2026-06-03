@@ -123,6 +123,22 @@
   .aside{margin-top:26px;font-size:16px;font-style:italic;color:var(--mut);line-height:1.7;max-width:580px}
   .aside b{font-style:normal;color:var(--ink-soft);font-weight:500}
 
+  /* ---------- QUALIFICATION LADDER ---------- */
+  .ladder{margin-top:6px}
+  .lad{display:grid;grid-template-columns:128px 1fr 54px;gap:16px;align-items:center;
+    padding:11px 0;border-bottom:1px solid var(--line-soft)}
+  .lad .st{font-family:var(--disp);font-size:17px;color:var(--ink-soft)}
+  .lad .lt{height:3px;background:var(--line);position:relative;overflow:hidden}
+  .lad .lt i{position:absolute;left:0;top:0;height:100%;background:var(--ink-soft);width:0;
+    transition:width 1.1s cubic-bezier(.2,.75,.2,1)}
+  .lad .lp{font-family:var(--disp);font-size:15px;color:var(--mut);text-align:right}
+  .lad.reached .st{color:var(--accent);font-weight:500}
+  .lad.reached .lp{color:var(--accent)}
+  .lad.reached .lt i{background:var(--accent)}
+  .climb{margin-top:30px}
+  .climb h3{font-family:var(--disp);font-weight:500;font-size:24px;margin-bottom:6px}
+  .climb .note{font-style:italic;color:var(--mut);font-size:15px;margin-bottom:16px}
+
   /* ---------- 2026 ---------- */
   .erow{display:grid;grid-template-columns:26px 1fr 150px 52px;gap:16px;align-items:center;
     padding:11px 0;border-bottom:1px solid var(--line-soft);
@@ -208,7 +224,33 @@
       <h2>Morocco against the giants</h2>
       <p class="intro">A nation that turned arithmetic into folklore. Its World Cup victories, ordered by the size of the upset they represented.</p>
       <div id="morocco"></div>
-      <p class="aside">A note on what is missing. This ledger counts only victories settled in regulation play. Morocco's defeat of Spain in 2022 — goalless, then decided on penalties — is recorded in the data as a draw, and so the most celebrated escape of all does not appear here. <b>That is the next chapter:</b> not the probability of winning a match, but of surviving a tournament.</p>
+      <p class="aside">A note on what is missing. This ledger counts only victories settled in regulation play. Morocco's defeat of Spain in 2022 — goalless, then decided on penalties — is recorded in the data as a draw, and so the most celebrated escape of all does not appear here. <b>That is the chapter below:</b> not the probability of winning a match, but of surviving a tournament.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- QUALIFICATION -->
+  <section>
+    <div class="eyebrow">The Deeper Miracle</div>
+    <h2>Surviving the tournament</h2>
+    <p class="sublede">A single upset is one thing; climbing through an entire bracket against the odds is another. We froze every team's strength at the eve of Qatar 2022 — no hindsight — and simulated the whole tournament forty thousand times, then asked how improbable each nation's actual run truly was.</p>
+
+    <div class="one" style="border-top-color:var(--accent)">
+      <div class="yr">Qatar 2022 · Monte-Carlo · 40,000 simulations</div>
+      <div class="match">Morocco <span class="vs">all the way to the</span> <span class="sc">semi-final</span></div>
+      <div class="body">
+        <p>Before a ball was kicked, the model gave Morocco a <b>2.5%</b> chance of reaching the last four. They did — finishing fourth in the world. No run in the tournament was less expected, and none on record runs deeper than a single upset.</p>
+        <div class="score"><div class="num" data-count="97.5" data-dec="1">0</div><div class="cap">Qualification miracle</div></div>
+      </div>
+    </div>
+
+    <div class="ledger" id="qual" style="margin-top:30px"></div>
+
+    <div class="climb">
+      <h3>Morocco's improbable climb</h3>
+      <p class="note">The pre-tournament probability of reaching each round. Each step roughly a third as likely as the last.</p>
+      <div id="ladder"></div>
     </div>
   </section>
 
@@ -231,7 +273,7 @@
     <div class="method">
       <p>An Elo rating model, in the tradition of the World Football Elo Ratings, is built chronologically across every international match since 1872. Each team carries a strength; each result moves it, weighted by the importance of the fixture and the margin of victory. Home advantage is set at one hundred points, and falls to zero on neutral ground.</p>
       <p>Before any World Cup match, the model holds an <b>expectation</b> for each side — a number between zero and one. When the underdog wins, the miracle index is simply one minus that expectation, expressed out of a hundred. A team expected to take a quarter of a point that wins outright has authored a far greater miracle than a near-equal that edges through.</p>
-      <p>One honest limitation: penalty shootouts are absent from the source data, so matches drawn in regulation are set aside. The famous escapes decided from the spot await a second, tournament-level measure.</p>
+      <p>For the deeper question — how improbable a whole run was — the same ratings are frozen at the eve of the tournament and the entire bracket is simulated forty thousand times. Group stages are played as round-robins; knockout ties resolve in regulation, and when level, a penalty shootout is modelled as a near coin-flip with only a mild edge to the stronger side. The qualification miracle is one minus the probability of reaching the stage a team actually reached.</p>
     </div>
   </section>
 
@@ -302,6 +344,54 @@ ELO.forEach((d,i)=>{
   e.appendChild(el);
 });
 
+const QUAL = [
+  {r:1,t:"Morocco",st:"semi-final",p:2.5,mi:97.5},
+  {r:2,t:"Croatia",st:"semi-final",p:10.2,mi:89.8},
+  {r:3,t:"France",st:"final",p:12.8,mi:87.2},
+  {r:4,t:"Argentina",st:"the title",p:20.0,mi:80.0},
+  {r:5,t:"Australia",st:"round of 16",p:27.1,mi:72.9},
+  {r:6,t:"Senegal",st:"round of 16",p:31.9,mi:68.1},
+  {r:7,t:"Japan",st:"round of 16",p:33.0,mi:67.0},
+  {r:8,t:"England",st:"quarter-final",p:34.3,mi:65.7},
+  {r:9,t:"Poland",st:"round of 16",p:39.4,mi:60.6},
+  {r:10,t:"Portugal",st:"quarter-final",p:40.0,mi:60.0},
+  {r:11,t:"South Korea",st:"round of 16",p:41.0,mi:59.0},
+  {r:12,t:"United States",st:"round of 16",p:48.5,mi:51.5},
+  {r:13,t:"Netherlands",st:"quarter-final",p:63.5,mi:36.5},
+  {r:14,t:"Brazil",st:"quarter-final",p:72.5,mi:27.5},
+  {r:15,t:"Spain",st:"round of 16",p:78.0,mi:22.0},
+];
+const PATH = [
+  {st:"Round of 16",p:30.5,reached:true},
+  {st:"Quarter-final",p:9.9,reached:true},
+  {st:"Semi-final",p:2.5,reached:true},
+  {st:"Final",p:0.7,reached:false},
+  {st:"The title",p:0.2,reached:false},
+];
+
+const q=document.getElementById('qual');
+QUAL.forEach(d=>{
+  const el=document.createElement('div');el.className='lrow'+(d.t==='Morocco'?' mor':'');
+  el.innerHTML=`<div class="rk">${d.r}</div>
+    <div class="m">
+      <div class="pair">${d.t} <span class="beat">to the</span> ${d.st}</div>
+      <div class="sub">probability ${d.p}% · simulated 40,000×</div>
+      <div class="track"><i data-w="${d.mi}"></i></div>
+    </div>
+    <div class="mi">${d.mi}</div>`;
+  q.appendChild(el);
+});
+
+const lad=document.getElementById('ladder');const pmax=PATH[0].p;
+PATH.forEach(d=>{
+  const el=document.createElement('div');el.className='lad'+(d.reached?' reached':'');
+  const pct=Math.round(d.p/pmax*100);
+  el.innerHTML=`<div class="st">${d.st}</div>
+    <div class="lt"><i data-w="${pct}"></i></div>
+    <div class="lp">${d.p}%</div>`;
+  lad.appendChild(el);
+});
+
 const io=new IntersectionObserver((es)=>{
   es.forEach(en=>{
     if(en.isIntersecting){
@@ -312,7 +402,7 @@ const io=new IntersectionObserver((es)=>{
     }
   });
 },{threshold:.18});
-document.querySelectorAll('.lrow,.erow').forEach((r,i)=>{r.style.transitionDelay=(i%15*45)+'ms';io.observe(r);});
+document.querySelectorAll('.lrow,.erow,.lad').forEach((r,i)=>{r.style.transitionDelay=(i%15*45)+'ms';io.observe(r);});
 
 function countUp(el){
   const tgt=parseFloat(el.dataset.count),dec=+(el.dataset.dec||0),dur=1500,t0=performance.now();
